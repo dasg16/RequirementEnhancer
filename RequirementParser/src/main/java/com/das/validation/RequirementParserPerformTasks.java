@@ -3,6 +3,7 @@ package com.das.validation;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -32,6 +33,7 @@ public class RequirementParserPerformTasks {
 	public static ArrayList<ArrayList<Boolean>> outerBooleanArrayList = new ArrayList<ArrayList<Boolean>>();
 	public static ArrayList<ArrayList<String>> outerStringArrayList = new ArrayList<ArrayList<String>>();
 	public static Set<ArrayList<Boolean>> mcdcArrayList = new HashSet<ArrayList<Boolean>>();
+	public static HashMap<Integer, String> mapCondition = new HashMap<Integer, String>();
 
 	public static int totalColumns = 0;
 
@@ -46,6 +48,7 @@ public class RequirementParserPerformTasks {
 		RequirementParserPerformTasks.getDataIntoArrayList(rangeValue.getThen(), "then");
 
 		String equation = RequirementParserPerformTasks.getLogicalString(rangeValue.getGiven(), rangeValue.getWhen());
+		System.out.println(equation);
 
 		getPermutation(totalColumns, decisionTable, outerBooleanArrayList);
 
@@ -101,27 +104,32 @@ public class RequirementParserPerformTasks {
 	}
 
 	public static void calculateMCDC(ArrayList<ArrayList<Boolean>> outerBooleanArrayList) {
-		// TODO Auto-generated method stub
+		setConditionMap();
 		for (int i = 1; i < outerBooleanArrayList.size(); i++) {
 			System.out.println(outerBooleanArrayList);
-			boolean hitOne = false;
-			boolean hitTwo = false;
+
 			int innerArrayListMaxSize = outerBooleanArrayList.get(i).size();
-			for (int j = 0; j < outerBooleanArrayList.get(i).size(); j++) {
-				boolean decisionElement = outerBooleanArrayList.get(i).get(innerArrayListMaxSize - 1);
-				int decisionElementIndex = innerArrayListMaxSize - 1;
-				if ((outerBooleanArrayList.get(i).get(j) == true) && (decisionElement == true)
-						&& (j != innerArrayListMaxSize - 1)) {
+			for (int j = 0; j < outerBooleanArrayList.get(i).size() - 1; j++) {
+				if (mapCondition.get(j).equalsIgnoreCase("Not covered")) {
 
-					compareWithOtherLine(i, j, decisionElementIndex, outerBooleanArrayList);
-				}
+					boolean decisionElement = outerBooleanArrayList.get(i).get(innerArrayListMaxSize - 1);
+					int decisionElementIndex = innerArrayListMaxSize - 1;
+					if ((outerBooleanArrayList.get(i).get(j) == true) && (decisionElement == true)) {
 
-				if ((outerBooleanArrayList.get(i).get(j) == false) && (decisionElement == false)
-						&& (j != innerArrayListMaxSize - 1)) {
-					compareWithOtherLine(i, j, decisionElementIndex, outerBooleanArrayList);
+						compareWithOtherLine(i, j, decisionElementIndex, outerBooleanArrayList);
+					}
+
+					if ((outerBooleanArrayList.get(i).get(j) == false) && (decisionElement == false)) {
+						compareWithOtherLine(i, j, decisionElementIndex, outerBooleanArrayList);
+					}
 				}
 			}
+		}
+	}
 
+	public static void setConditionMap() {
+		for (int j = 0; j < outerBooleanArrayList.get(0).size() - 1; j++) {
+			mapCondition.put(j, "Not covered");
 		}
 	}
 
@@ -157,6 +165,7 @@ public class RequirementParserPerformTasks {
 					mcdcArrayList.add(outerBooleanArrayList.get(i));
 					System.out.println(outerBooleanArrayList.get(p));
 					System.out.println(outerBooleanArrayList.get(i));
+					mapCondition.put(j, "Covered");
 
 				}
 
